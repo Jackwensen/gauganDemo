@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>GauGAN | Landscape Sketch</title>
+    <title>GauGAN Demo</title>
 
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/atrament.js/1.0.0/atrament.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"></script>
@@ -36,22 +36,37 @@
     <div id="root"></div>
 
     <style>
+        .app {
+            height: 100%;
+            width: 100%;
+            text-align: center;
+        }
         .container {
             display: flex;
             flex: 1;
             justify-content: center;
             align-items: center;
-
-            background: #111111;
-            color: #cccccc;
+            flex-direction: column;
+            background: #ffe3ac;
+            color: #000000;
             font-family: 'Roboto', sans-serif;
+        }
+
+        .pad {
+            height: 600px;
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 70px;
         }
 
         #sketchpad, #rendered {
             width: 512px;
             height: 512px;
             background: #262626;
-            margin: 5px;
+            margin: 15px;
+            box-shadow: rgb(128 128 128) 0px 0px 10px;
         }
 
         #rendered {
@@ -74,7 +89,8 @@
         .no-render .label {
             font-size: 12px;
             margin-top: 8px;
-            color: #adadad;
+            color: #eceb9c;
+            text-decoration-color: #ffffff;
             width: 190px;
             text-align: center;
             margin-bottom: 20px;
@@ -82,33 +98,41 @@
         .generated-image {
             flex-grow: 1;
         }
-        .btn-render {
+        .panel {
+            width: 500px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             position: absolute;
-            background: rgba(15, 48, 214, 0.5);
+            top: 780px;
+            /* left: 50%; */
+            /* margin-left: 50%; */
+        }
+        .btn-render {
+            background: rgba(52, 86, 255, 0.945);
             color: #e8e8e8;
-            width: 160px;
+            width: 150px;
             border-radius: 3px;
             text-align: center;
             padding: 10px;
-            bottom: 40px;
-            left: 50%;
-            margin-left: -80px;
             cursor: pointer;
             font-size: 14px;
         }
         .btn-render:hover {
             background: rgba(15, 48, 214, 0.7);
-            padding: 11px;
+            /* padding: 11px;
             bottom: 39px;
             width: 162px;
-            margin-left: -81px;
+            margin-left: -81px; */
         }
 
         #toolbar {
-            background: #303030;
-            width: 200px;
-            height: 512px;
+            border-radius: 10px;
+            background: #ffb79f;
+            width: 80%;
+            height: 140px;
             margin: 5px;
+            margin-top: 80px;
             padding: 8px;
             display: flex;
             flex-direction: column;
@@ -131,16 +155,32 @@
             flex-direction: column;
         }
         #toolbar .scroll {
-            overflow: scroll;
+            border-radius: 10px;
+            overflow: auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
             background: rgba(0,0,0,.3);
             padding: 4px;
             flex-grow: 1;
         }
         #toolbar .color {
+            border-radius: 10px;
             padding: 5px;
             margin: 5px;
+            width: 85px;
+            height: 60px;
+            line-height: 48px;
             color: white;
+            text-align: center;
         }
+        #toolbar .color:hover {
+            cursor: pointer;
+            /* width: 88px; */
+            height: 63px;
+        }
+
 
         input {
             width: 98%;
@@ -193,6 +233,7 @@
                 this.state = {
                     image: null,
                     strokeWidth: 18,
+                    isChangeSize: false,
                 };
             }
 
@@ -225,6 +266,7 @@
             }
 
             setSketchStrokeWidth = (width) => {
+                console.log(width)
                 this.sketchpad.weight = this.state.strokeWidth;
                 this.setState({
                     strokeWidth: width,
@@ -268,50 +310,53 @@
 
             render() {
                 return <React.Fragment>
-                    <div className="container">
-                        <div id="toolbar">
-                            <div className="row">
-                                <input type="button" value="Clear" onClick={() => this.clearSketch()} />
-                            </div>
-                            <div className="row">
-                                <div className="label">Stroke Thickness: {this.state.strokeWidth}px</div>
-                                <div className="field">
-                                    <input type="range" min="1" max="80" 
-                                        value={this.state.strokeWidth}
-                                        onChange={(e) => this.setSketchStrokeWidth(parseInt(e.target.value))} />
+                    <div className="app">
+                        <div className="container">
+                            <div id="toolbar">
+                                <div className="row color-panel">
+                                    <div className="label" style={{display: 'none'}} >Color Palette:</div>
+                                    <div className="scroll">
+                                        {colorMap.map(c => 
+                                            <div key={c.color} className="color" style={{
+                                                'background': c.color, 
+                                                'color': c.labelColor || 'white',
+                                                'textShadow': c.labelColor ? '' : '0 0 1px black' 
+                                            }} onClick={() => this.setSketchColor(c.color)}>{c.label}</div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                            <div className="row color-panel">
-                                <div className="label">Color Palette:</div>
-                                <div className="scroll">
-                                    {colorMap.map(c => 
-                                        <div key={c.color} className="color" style={{
-                                            'background': c.color, 
-                                            'color': c.labelColor || 'white',
-                                            'textShadow': c.labelColor ? '' : '0 0 1px black' 
-                                        }} onClick={() => this.setSketchColor(c.color)}>{c.label}</div>
-                                    )}
+                            <div className="pad">
+                                <canvas id="sketchpad" ref={this.canvasRef}></canvas>
+                                <div id="rendered">
+                                    {this.state.image ? null : <div className="no-render">
+                                        <div className="icon"><i className="far fa-images"></i></div>
+                                        
+                                    </div>}
+                                    {this.state.image ? <img className="generated-image" src={this.state.image} /> : null}
+                                </div>
+                                <div className="panel">
+                                    <div className="row">
+                                        <div className="label">Stroke Thickness: {this.state.strokeWidth}px</div>
+                                        <div className="field">
+                                            <input type="range" min="1" max="80" 
+                                                value={this.state.strokeWidth}
+                                                onChange={(e) => this.setSketchStrokeWidth(parseInt(e.target.value))} 
+                                                onInput={(e) => console.log(1, e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="btn-render" onClick={() => this.clearSketch()}>Clear</div>
+                                    <div className="btn-render" onClick={this.generateSketch}>Generate</div>
                                 </div>
                             </div>
-                        </div>
-                        <canvas id="sketchpad" ref={this.canvasRef}></canvas>
-                        <div id="rendered">
-                            {this.state.image ? null : <div className="no-render">
-                                <div className="icon"><i className="far fa-images"></i></div>
-                                <div className="label">Paint something then click the render button below!</div>
-                            </div>}
-                            {this.state.image ? <img className="generated-image" src={this.state.image} /> : null}
-                            <div className="btn-render" onClick={this.generateSketch}>Generate Image</div>
                         </div>
                     </div>
                 </React.Fragment>;
             }
         }
-
-        ReactDOM.render(
-            <SketchBoard />,
-            document.getElementById('root')
-        );
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(SketchBoard))
     </script>
 </body>
 

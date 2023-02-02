@@ -1,3 +1,4 @@
 /flask/pretrained
 .DS_Store
 /Synchronized-BatchNorm-PyTorch
+**/__pycache__
