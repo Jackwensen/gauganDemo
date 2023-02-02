@@ -5,15 +5,15 @@ app = Flask(__name__, static_url_path='')
 import io
 import numpy as np
 
-import amodel # import evaluate, to_image
+import model_inst # import evaluate, to_image
 
 @app.route('/generate', methods = ['POST'])
 def generate():
     # labelmap = np.load('/app/labelmap.npy')
     labelmap = np.asarray(request.json)
 
-    image = amodel.evaluate(labelmap)
-    image = amodel.to_image(image)
+    image = model_inst.evaluate(labelmap)
+    image = model_inst.to_image(image)
 
     # create file-object in memory
     file_object = io.BytesIO()

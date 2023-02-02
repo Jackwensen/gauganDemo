@@ -17,7 +17,7 @@ def evaluate(labelmap):
         'load_size': 512,
         'aspect_ratio': 1.0,
         'isTrain': False,
-        'checkpoints_dir': '/app/pretrained',
+        'checkpoints_dir': 'flask/pretrained',
         'which_epoch': 'latest',
         'use_gpu': True
     }

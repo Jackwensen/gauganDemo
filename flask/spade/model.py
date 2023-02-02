@@ -76,6 +76,8 @@ class Pix2PixModel(torch.nn.Module):
   def load_network(self, net, label, epoch, opt):
     save_filename = '%s_net_%s.pth' % (epoch, label)
     save_path = os.path.join(opt['checkpoints_dir'], save_filename)
+    # gauganDemo/flask/spade/pretrained/latest_net_G.pth
+    print(save_path)
     weights = torch.load(save_path)
     net.load_state_dict(weights)
     return net
